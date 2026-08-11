@@ -1,0 +1,3 @@
+# Netlify configuration for the "בקיבוץ" landing page
+[build]
+  publish = "public"
