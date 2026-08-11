@@ -551,4 +551,114 @@
   }
 })();
 </script>
+
+<script>
+/* ================= BACKOFFICE / EDIT MODE =================
+   Private editing mode for the site owner. Not linked from anywhere.
+   Activate by opening the file with  #edit  (e.g. bakibutz.html#edit).
+   Click any text to edit it in place; "שמירת קובץ" downloads an updated
+   bakibutz.html that replaces the original. Future admin features go here. */
+(function(){
+  /* owner-only: edit mode exists ONLY when the page runs locally —
+     opened as a file (file://) or served from localhost.
+     On the real deployed site this whole block is inert. */
+  var LOCAL = location.protocol === 'file:' ||
+              ['localhost', '127.0.0.1', '[::1]'].indexOf(location.hostname) !== -1;
+  if (!LOCAL) return;
+
+  var EDIT = location.hash === '#edit' || /[?&]edit\b/.test(location.search);
+  /* adding/removing #edit in the address bar only fires hashchange (no page load),
+     so reload to re-evaluate the flag */
+  window.addEventListener('hashchange', function(){ location.reload(); });
+  if (!EDIT) return;
+
+  var page = document.getElementById('page');
+  var dirty = false;
+
+  /* --- what is editable --- */
+  var EDITABLE = 'h1, h2, h3, p, figcaption, label, .btn span, button.btn-register, option, .form-note, .strip-hint';
+
+  function enableEditing(){
+    page.querySelectorAll(EDITABLE).forEach(function(el){
+      if (el.closest('[data-edit-ui]')) return;
+      el.setAttribute('contenteditable', 'plaintext-only');
+      if (!el.isContentEditable) el.setAttribute('contenteditable', 'true');
+    });
+  }
+  enableEditing();
+  page.addEventListener('input', function(){ dirty = true; });
+
+  /* neutralize interactive elements so their labels can be edited */
+  page.addEventListener('click', function(e){
+    if (e.target.closest('[data-edit-ui]')) return;
+    var act = e.target.closest('a, button');
+    if (act) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+
+  /* --- edit-mode chrome (runtime only, stripped from saved file) --- */
+  var css = document.createElement('style');
+  css.setAttribute('data-edit-ui', '1');
+  css.textContent =
+    '[contenteditable]{outline:1.5px dashed rgba(217,180,91,.55);outline-offset:3px;border-radius:3px;cursor:text}' +
+    '[contenteditable]:hover{outline-color:#D9B45B}' +
+    '[contenteditable]:focus{outline:2.5px solid #D9B45B;background:rgba(217,180,91,.08)}' +
+    '#edit-bar{position:fixed;inset-inline:0;bottom:0;z-index:9999;display:flex;flex-wrap:wrap;gap:.6rem;' +
+      'align-items:center;justify-content:center;padding:.7rem 1rem;direction:rtl;' +
+      'background:rgba(20,28,22,.96);border-top:2px solid #D9B45B;backdrop-filter:blur(6px);' +
+      'font-family:Assistant,sans-serif}' +
+    '#edit-bar .msg{color:#E6CE8F;font-size:.95rem;font-weight:600}' +
+    '#edit-bar button{font:inherit;font-weight:700;border:none;border-radius:999px;cursor:pointer;padding:.55rem 1.3rem}' +
+    '#edit-bar .save{background:#D9B45B;color:#241F0E}' +
+    '#edit-bar .quit{background:transparent;color:#C8C4AC;border:1px solid rgba(240,235,216,.3)}' +
+    '#page{padding-bottom:5rem}';
+  document.head.appendChild(css);
+
+  var bar = document.createElement('div');
+  bar.id = 'edit-bar';
+  bar.setAttribute('data-edit-ui', '1');
+  bar.innerHTML =
+    '<span class="msg">✏️ מצב עריכה — לחצו על כל טקסט כדי לערוך</span>' +
+    '<button type="button" class="save">💾 שמירת קובץ</button>' +
+    '<button type="button" class="quit undo">ביטול שינויים</button>' +
+    '<button type="button" class="quit exit">יציאה</button>';
+  document.body.appendChild(bar);
+
+  /* --- save: serialize a clean copy of the page and download it --- */
+  function cleanClone(){
+    var c = page.cloneNode(true);
+    c.querySelectorAll('[data-edit-ui]').forEach(function(n){ n.remove(); });
+    c.querySelectorAll('[contenteditable]').forEach(function(n){ n.removeAttribute('contenteditable'); });
+    c.querySelectorAll('.reveal.in').forEach(function(n){ n.classList.remove('in'); });
+    c.querySelectorAll('dialog').forEach(function(n){ n.removeAttribute('open'); n.classList.remove('done'); });
+    var strip = c.querySelector('#strip'); if (strip) strip.classList.remove('dragging');
+    return c;
+  }
+  bar.querySelector('.save').addEventListener('click', function(){
+    var out = '<title>' + document.title + '</title>\n' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+      cleanClone().outerHTML + '\n';
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([out], { type: 'text/html' }));
+    a.download = 'bakibutz.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    dirty = false;
+    var msg = bar.querySelector('.msg');
+    msg.textContent = '✅ הקובץ נשמר להורדות — החליפו איתו את bakibutz.html';
+    setTimeout(function(){ msg.textContent = '✏️ מצב עריכה — לחצו על כל טקסט כדי לערוך'; }, 5000);
+  });
+  bar.querySelector('.undo').addEventListener('click', function(){
+    if (confirm('לבטל את כל השינויים שלא נשמרו?')) { dirty = false; location.reload(); }
+  });
+  bar.querySelector('.exit').addEventListener('click', function(){
+    if (dirty && !confirm('יש שינויים שלא נשמרו. לצאת בכל זאת?')) return;
+    dirty = false;
+    location.hash = '';
+    location.reload();
+  });
+  window.addEventListener('beforeunload', function(e){
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+})();
+</script>
 </div>
