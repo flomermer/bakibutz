@@ -231,6 +231,7 @@
 
   /* ---------- dialog / form (cream paper sheet) ---------- */
   dialog.sheet{
+    margin:auto; /* keep the modal centered — the page reset removes the UA default */
     border:none;border-radius:20px;
     background:var(--card);color:var(--ink);
     box-shadow:0 30px 80px rgba(0,0,0,.5);
@@ -495,6 +496,15 @@
   });
   document.getElementById('closeSheet').addEventListener('click', function(){ sheet.close(); });
   document.getElementById('closeThanks').addEventListener('click', function(){ sheet.close(); });
+
+  /* click on the darkened backdrop closes the dialog.
+     Track where the press STARTED so a drag that ends outside
+     (e.g. selecting text in a field) doesn't close it by accident. */
+  var pressedBackdrop = false;
+  sheet.addEventListener('pointerdown', function(e){ pressedBackdrop = (e.target === sheet); });
+  sheet.addEventListener('click', function(e){
+    if (pressedBackdrop && e.target === sheet) sheet.close();
+  });
 
   form.addEventListener('submit', function(ev){
     ev.preventDefault();
