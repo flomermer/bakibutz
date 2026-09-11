@@ -11,12 +11,23 @@ hosting business in Kibbutz Barkai. **Speak Hebrew with the user.**
 - `netlify.toml` — tells Netlify to publish only `public/`.
 
 ## Deploy
+Netlify builds from GitHub: **any push to `main` publishes the site automatically**
+(no build command, publish dir `public/`). The flow is:
 ```bash
-npx -y netlify-cli deploy --prod
+git pull --rebase   # ALWAYS, before touching public/index.html
+# ...edits...
+git add -A && git commit -m "..." && git push
 ```
-Run from the repo root. The folder is already linked (`.netlify/state.json`) and the
-user is logged in. Production URL: https://bakibutz.netlify.app
-After deploying, report the URL and what changed.
+Production URL: https://bakibutz.netlify.app — live ~30–60s after the push. Verify with
+`curl -s -o /dev/null -w "%{http_code}" https://bakibutz.netlify.app/` (expect 200),
+then report the URL and what changed.
+
+Repo: https://github.com/flomermer/bakibutz (private). Two people work on this — Tomer
+and Danielle — each from their own machine with their own Claude.
+
+`npx -y netlify-cli deploy --prod` still works as a manual fallback, but only on Tomer's
+machine (his is the only Netlify account), and it publishes the local file without going
+through git, so repo and production can drift apart. Prefer the push.
 
 ## Design language
 Dark "forest evening" theme modeled on the owner's Canva reference — deep green ground
@@ -46,5 +57,13 @@ message. Ovadia: +972523606893. Form fields carry `data-1p-ignore`/`autocomplete
 to silence password managers — keep those when touching the form.
 
 ## Git
-Never create or offer git commits. The user commits manually and will ask explicitly
-when they want one.
+A push to `main` *is* a deploy to the live site, so **ask the user for approval before
+committing and pushing** — then do it, since that's the only way a change reaches
+production. Never commit unasked-for or unrelated work.
+
+The whole site is one ~3.7MB file full of base64 images, so a merge conflict inside it is
+practically unfixable by hand. Discipline:
+- `git pull --rebase` at the start of every editing session, no exceptions.
+- Commit and push each finished change right away; don't sit on local edits.
+- If a conflict does hit `public/index.html`, don't hand-merge — take one side whole
+  (`git checkout --ours/--theirs public/index.html`) and redo the other change on top.
