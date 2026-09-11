@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>בקיבוץ — ליצור, לאכול ולחוות</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <div id="page" dir="rtl" lang="he">
@@ -644,7 +645,8 @@
     return c;
   }
   bar.querySelector('.save').addEventListener('click', function(){
-    var out = '<title>' + document.title + '</title>\n' +
+    var out = '<meta charset="utf-8">\n' +
+      '<title>' + document.title + '</title>\n' +
       '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
       cleanClone().outerHTML + '\n';
     var a = document.createElement('a');
