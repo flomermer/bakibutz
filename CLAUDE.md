@@ -18,12 +18,16 @@ git pull --rebase   # ALWAYS, before touching public/index.html
 # ...edits...
 git add -A && git commit -m "..." && git push
 ```
-Production URL: https://bakibutz.netlify.app — live ~30–60s after the push. Verify with
+Production URL: https://bakibutz.netlify.app — live ~15–30s after the push (measured
+builds: 10–15s, plus webhook and queue). Verify with
 `curl -s -o /dev/null -w "%{http_code}" https://bakibutz.netlify.app/` (expect 200),
 then report the URL and what changed.
 
-Repo: https://github.com/flomermer/bakibutz (private). Two people work on this — Tomer
-and Danielle — each from their own machine with their own Claude.
+Repo: https://github.com/flomermer/bakibutz. Two people work on this — Tomer and
+Danielle — each from their own machine with their own Claude. The repo is **public on
+purpose**: on Netlify's free plan a private repo only builds from commits by paid team
+members, so Danielle's pushes were rejected with "Unrecognized Git contributor". Don't
+flip it back to private without also moving deploys off Netlify's git integration.
 
 `npx -y netlify-cli deploy --prod` still works as a manual fallback, but only on Tomer's
 machine (his is the only Netlify account), and it publishes the local file without going
