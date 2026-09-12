@@ -52,6 +52,10 @@ images carry `loading="lazy"`; keep that on new ones.
 ## Owner edit mode (backoffice)
 Opening `public/index.html` locally with `#edit` in the URL (file:// or localhost only)
 enables in-place text editing; "שמירת קובץ" downloads an updated file the user swaps in.
+The bar also has a four-step size picker for the text block that has the caret; it
+tags the element `.fs-s/.fs-m/.fs-l/.fs-xl`, which set `--fs` — every font-size rule in
+the stylesheet is `calc(<design size> * var(--fs))`, so scaled text keeps its
+clamp()/vw responsiveness. Give any new text rule the same `* var(--fs)` factor.
 The mode is hard-blocked on any real domain. The file gets re-serialized by this flow,
 so attribute order/whitespace may shift — grep for actual strings before Edit calls.
 
