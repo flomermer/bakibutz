@@ -23,8 +23,11 @@ builds: 10–15s, plus webhook and queue). Verify with
 `curl -s -o /dev/null -w "%{http_code}" https://bakibutz.netlify.app/` (expect 200),
 then report the URL and what changed.
 
-Repo: https://github.com/flomermer/bakibutz. Two people work on this — Tomer and
-Danielle — each from their own machine with their own Claude. The repo is **public on
+Repo: https://github.com/flomermer/bakibutz. **Since 2026-11-20 Danielle runs the site
+on her own** — she is the primary (practically only) editor. Tomer may still push a
+rare fix from his own machine with his own Claude, so the pull-first discipline below
+still applies. The Netlify account is Tomer's: anything on the Netlify side (domain,
+plan, site settings) needs him. The repo is **public on
 purpose**: on Netlify's free plan a private repo only builds from commits by paid team
 members, so Danielle's pushes were rejected with "Unrecognized Git contributor". Don't
 flip it back to private without also moving deploys off Netlify's git integration.
